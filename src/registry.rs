@@ -6,9 +6,11 @@ use windows::{
         HKEY, RegCreateKeyExW, RegSetValueExW, RegOpenKeyExW, RegCloseKey,
         RegEnumKeyExW, RegQueryValueExW, HKEY_CURRENT_USER, HKEY_LOCAL_MACHINE,
         KEY_READ, KEY_ALL_ACCESS, REG_OPTION_NON_VOLATILE, REG_SZ, REG_VALUE_TYPE,
+        RegDeleteValueW,
     },
 };
 use PMD2_HWiNFO::SENSORS;
+use std::env;
 
 pub fn to_wide_null(s: &str) -> Vec<u16> {
     s.encode_utf16().chain(std::iter::once(0)).collect()
@@ -105,4 +107,58 @@ pub fn setup_sensors(reg_key: HKEY) -> windows::core::Result<HashMap<String, Str
     }
 
     Ok(sensor_keys)
+}
+
+pub fn toggle_startup() -> windows::core::Result<()> {
+    unsafe {
+        let mut run_key = HKEY::default();
+        RegCreateKeyExW(
+            HKEY_CURRENT_USER,
+            w!("Software\\Microsoft\\Windows\\CurrentVersion\\Run"),
+            0,
+            PCWSTR::null(),
+            REG_OPTION_NON_VOLATILE,
+            KEY_ALL_ACCESS,
+            None,
+            &mut run_key,
+            None,
+        ).ok()?;
+
+        let app_name = w!("PMD2-HWiNFO");
+        
+        let mut buf = [0u8; 1024];
+        let mut size = buf.len() as u32;
+        let mut value_type = REG_VALUE_TYPE::default();
+        
+        let result = RegQueryValueExW(
+            run_key,
+            app_name,
+            None,
+            Some(&mut value_type),
+            Some(buf.as_mut_ptr()),
+            Some(&mut size),
+        );
+
+        if result == ERROR_SUCCESS {
+            RegDeleteValueW(run_key, app_name).ok()?;
+        } else {
+            let exe_path = env::current_exe()?.to_string_lossy().to_string();
+            let value = format!("\"{}\"\0", exe_path);
+            let value_wide = value.encode_utf16().collect::<Vec<u16>>();
+            
+            RegSetValueExW(
+                run_key,
+                app_name,
+                0,
+                REG_SZ,
+                Some(std::slice::from_raw_parts(
+                    value_wide.as_ptr() as *const u8,
+                    value_wide.len() * 2,
+                )),
+            ).ok()?;
+        }
+
+        let _ = RegCloseKey(run_key);
+        Ok(())
+    }
 } 

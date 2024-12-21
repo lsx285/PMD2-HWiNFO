@@ -1,12 +1,19 @@
-use std::{thread, time::Duration};
+use std::{thread, time::Duration, env};
 mod registry;
 mod serial;
 
 use PMD2_HWiNFO::RAILS;
-use crate::registry::{init_hwinfo_registry, update_registry, find_com_port, setup_sensors};
+use crate::registry::{init_hwinfo_registry, update_registry, find_com_port, setup_sensors, toggle_startup};
 use crate::serial::{open_serial_port, read_sensor_data};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
+    // Handle startup argument
+    let args: Vec<String> = env::args().collect();
+    if args.len() > 1 && (args[1].eq_ignore_ascii_case("-s")) {
+        toggle_startup()?;
+        return Ok(());
+    }
+
     // Initialize registry
     let reg_key = init_hwinfo_registry()?;
     let sensor_keys = setup_sensors(reg_key)?;
