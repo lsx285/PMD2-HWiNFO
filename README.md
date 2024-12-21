@@ -68,10 +68,10 @@ Follow these steps to build the application from source:
 git clone https://github.com/lsx285/PMD2-HWiNFO.git
 cd PMD2-HWiNFO
 
-# Build in release mode
+# Run with console window
 cargo build --release
 
-# Run without console window
+# Build in release mode
 cargo rustc --release --bin PMD2-HWiNFO -- -Clink-args="/SUBSYSTEM:WINDOWS /ENTRY:mainCRTStartup"
 ```
 
