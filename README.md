@@ -1,8 +1,11 @@
+
 # PMD2-HWiNFO
 
 **Real-time power monitoring tool bridging ElmorLabs PMD2 measurements to HWiNFO's sensor interface.**  
 Built with ❤️ in Rust.
 
+---
+[![Releases](https://img.shields.io/github/v/release/lsx285/PMD2-HWiNFO?label=Latest%20Release&style=flat-square)](https://github.com/lsx285/PMD2-HWiNFO/releases/latest)  [![VirusTotal](https://img.shields.io/badge/VirusTotal-blue?style=flat-square)](https://www.virustotal.com/gui/file/855b9d8f74ca528ebc069559100e73cb4b3631c69191832a13cb3602efe68de9/detection)
 ---
 
 ## Features
@@ -73,7 +76,6 @@ cargo rustc --release --bin PMD2-HWiNFO -- -Clink-args="/SUBSYSTEM:WINDOWS /ENTR
 ```
 
 ---
-
 
 ## License
 
